@@ -11,11 +11,17 @@ Example
 ironite new_project "My simple static blog"
 ```
 This will generate some basic project files and directories.
+
 projectname.txt => contains project name.
+
 static/base.html => base HTML file that will be used as a template to generate all pages. It contains two placeholdes ($TITLE and $CONTENT) which the generator function will replace accordingly.
+
 static/about.html => The $CONTENT of the homepage. This also contains the placeholder $NAVCLOUD, which the generator function will replace with links to each tag index page (each tag index page contains links to all entries for that tag).
+
 static/style.css => a rather empty CSS file.
+
 entries/ => contains blog entries.
+
 images/ => contains images.
 
 New blog entry
