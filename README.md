@@ -1,6 +1,8 @@
 # ironite
 Simple static site generator written in Rust.
 
+[My personal blog runs on ironite](https://xiokka.neocities.org/articles/)
+
 ## Usage
 Create a new project
 ```bash
