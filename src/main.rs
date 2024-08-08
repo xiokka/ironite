@@ -62,7 +62,7 @@ fn initialize_project(project_name: &str) -> io::Result<()> {
     // Path to the projectname.txt file in the root directory
     let about_file_path = Path::new(project_name).join("static").join("about.html");
     let mut about_file = File::create(about_file_path)?;
-    about_file.write_all("<p>This will be shown at the blog index. Edit me at static/about.html</p> <p>$NAVCLOUD</p>".as_bytes())?;
+    about_file.write_all("<p>This will be shown at the blog index. Edit me at static/about.html</p> $NAVCLOUD".as_bytes())?;
 
     println!("HTML content saved to static/base.html");
     println!("Project name saved to projectname.txt");
