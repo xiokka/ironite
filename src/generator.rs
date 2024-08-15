@@ -159,28 +159,34 @@ pub fn generate_entry_pages(base_html: &str, entries_dir: &Path, public_entries_
     Ok(())
 }
 
-// Generate tag pages
 pub fn generate_tag_pages(base_html: &str, tags_map: &HashMap<String, Vec<PathBuf>>, public_dir: &Path) -> io::Result<()> {
-    for (tag, paths) in tags_map {
-        let tag_dir = public_dir.join(tag);
-        create_directories(&tag_dir)?;
+    // Collect tags and sort them
+    let mut tags: Vec<String> = tags_map.keys().cloned().collect();
+    tags.sort();
 
-        let mut tag_content = String::new();
-        for path in paths {
-            let entry_title = path.file_name().unwrap().to_str().unwrap_or("Untitled");
-            let entry_link = format!("<a href=\"../entries/{}/index.html\">{}</a><br>", entry_title, entry_title);
-            tag_content.push_str(&entry_link);
+    // Iterate over sorted tags
+    for tag in tags {
+        if let Some(paths) = tags_map.get(&tag) {
+            let tag_dir = public_dir.join(&tag);
+            create_directories(&tag_dir)?;
+
+            let mut tag_content = String::new();
+            for path in paths {
+                let entry_title = path.file_name().unwrap().to_str().unwrap_or("Untitled");
+                let entry_link = format!("<a href=\"../entries/{}/index.html\">{}</a><br>", entry_title, entry_title);
+                tag_content.push_str(&entry_link);
+            }
+
+            let tag_html_content = replace_placeholders(
+                &base_html,
+                &[
+                    ("$CONTENT".to_string(), tag_content),
+                    ("$TITLE".to_string(), tag.to_string()),
+                    ("$NAVCLOUD".to_string(), "".to_string()),
+                ].iter().cloned().collect()
+            );
+            write_html_file(tag_dir.join("index.html"), &tag_html_content)?;
         }
-
-        let tag_html_content = replace_placeholders(
-            &base_html,
-            &[
-                ("$CONTENT".to_string(), tag_content),
-                ("$TITLE".to_string(), tag.to_string()),
-		("$NAVCLOUD".to_string(), "".to_string()),
-            ].iter().cloned().collect()
-        );
-        write_html_file(tag_dir.join("index.html"), &tag_html_content)?;
     }
     Ok(())
 }
@@ -242,10 +248,13 @@ pub fn generate_site() -> io::Result<()> {
     generate_tag_pages(&base_html, &tags_map, &public_dir)?;
 
     // Create navigation cloud. Contains links to each tag index
-    let nav_cloud = tags_map.keys()
+    let mut tags: Vec<String> = tags_map.keys().cloned().collect();
+    tags.sort();
+
+    let nav_cloud = tags
+        .into_iter()
         .map(|tag| format!("<a href=\"{}/index.html\">{}</a>", tag, tag))
         .collect::<String>();
-
 
 
     // Replace the $NAVCLOUD placeholder in about_txt_content with tags
@@ -266,18 +275,28 @@ pub fn generate_site() -> io::Result<()> {
     );
     write_html_file(public_dir.join("index.html"), &root_index_html_content)?;
 
-    // Generate entries index.html
-    let mut entries_index_content = String::new();
-    for entry in fs::read_dir(entries_dir.clone())? {
-        let entry = entry?;
-        let entry_path = entry.path();
-        if !entry_path.is_dir() {
-            continue;
-        }
-        let title = entry_path.file_name().unwrap().to_str().unwrap_or("Untitled");
-        let entry_link = format!("<a href=\"{}/index.html\">{}</a><br>", title, title);
-        entries_index_content.push_str(&entry_link);
-    }
+
+// Generate entries index.html
+let mut entries: Vec<_> = fs::read_dir(entries_dir.clone())?
+    .filter_map(Result::ok)  // Filter out any errors
+    .filter(|entry| entry.path().is_dir())  // Only include directories
+    .collect();
+
+// Sort the entries by their titles
+entries.sort_by(|a, b| {
+    a.path().file_name()
+        .unwrap_or_else(|| std::ffi::OsStr::new("Untitled"))
+        .cmp(&b.path().file_name().unwrap_or_else(|| std::ffi::OsStr::new("Untitled")))
+});
+
+let mut entries_index_content = String::new();
+for entry in entries {
+    let entry_path = entry.path();
+    let title = entry_path.file_name().unwrap().to_str().unwrap_or("Untitled");
+    let entry_link = format!("<a href=\"{}/index.html\">{}</a><br>", title, title);
+    entries_index_content.push_str(&entry_link);
+}
+
 
     let entries_index_html_content = replace_placeholders(
         &base_html,
