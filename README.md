@@ -32,7 +32,7 @@ ironite new_entry $entry_name
 ```
 Example
 ```bash
-ironite new_entry this_is_my_entry_there_are_many_like_it_but_this_one_is_mine
+ironite new_entry "This is my entry, there are many like it but this one is mine"
 ```
 Once a new entry is created, the corresponding subdirectory is created inside the entries directory. Within that entry, you will find two files: "tags.txt" and "content.html".
 tags.txt contains the tags for that entry, where each tag is separated by a whitespace. For example:
