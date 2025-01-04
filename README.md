@@ -34,8 +34,6 @@ Example
 ```bash
 ironite new_entry this_is_my_entry_there_are_many_like_it_but_this_one_is_mine
 ```
-You can use whitespaces for the entry name, you have the freedom to do so. However, this might mess with your URLs.
-
 Once a new entry is created, the corresponding subdirectory is created inside the entries directory. Within that entry, you will find two files: "tags.txt" and "content.html".
 tags.txt contains the tags for that entry, where each tag is separated by a whitespace. For example:
 ```
